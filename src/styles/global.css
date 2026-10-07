@@ -1,0 +1,67 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #f1f5f9;
+  background: #05070b;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.app-header {
+  flex: none;
+  padding: 0.75rem 1rem;
+  background: #10151d;
+  border-bottom: 1px solid #303b4b;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.map-area {
+  flex: 1;
+  min-height: 0;
+}
+
+.game-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #05070b;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+  background: #05070b;
+}
+
+.map-status {
+  position: absolute;
+  z-index: 2;
+  top: 1rem;
+  left: 1rem;
+  max-width: calc(100% - 5rem);
+  padding: 0.75rem 1rem;
+  border: 1px solid #303b4b;
+  border-radius: 0.25rem;
+  background: #10151d;
+}
+
+.map-status p {
+  margin: 0;
+}
