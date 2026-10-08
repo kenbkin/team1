@@ -5,7 +5,11 @@ Browser geography game foundation built with React, TypeScript, Vite, and MapLib
 The current milestone provides a minimal header, an interactive world map with navigation
 and attribution, a physical hybrid globe, loading/initialization error messages,
 and map configuration tests.
-Questions, markers, scoring, and round gameplay are not implemented yet.
+Scoring and round gameplay are not implemented yet.
+
+## Known MVP limitations
+
+Double-clicking or double-tapping the globe to zoom may also update the guess marker. This is a known and accepted MVP limitation. Single-click/tap selection remains immediate, and native MapLibre zoom gestures remain enabled. Gesture disambiguation is deferred until after MVP.
 
 ## Requirements and commands
 

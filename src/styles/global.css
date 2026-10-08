@@ -32,6 +32,34 @@ body {
   font-size: 1.25rem;
 }
 
+.question-prompt {
+  max-width: 65rem;
+  margin: 0.5rem 0;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.question-instruction,
+.guess-status {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.question-instruction {
+  color: #c8d3e0;
+}
+
+.guess-status {
+  min-height: 1.5em;
+  color: #ffba75;
+}
+
+.guess-marker {
+  pointer-events: none;
+}
+
 .map-area {
   flex: 1;
   min-height: 0;
