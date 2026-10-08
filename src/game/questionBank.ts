@@ -1,4 +1,71 @@
 import type { Question } from './question'
 
-// Only human-verified, approved questions belong here; production content comes later.
-export const questionBank: readonly Question[] = []
+// Human-verified, approved sample; the later content milestone expands this bank.
+export const questionBank: readonly Question[] = [
+  {
+    id: 'q001',
+    celebrityId: 'tom-hanks',
+    prompt: 'Where was Tom Hanks born?',
+    answerLabel: 'Concord, California, USA',
+    latitude: 37.97798,
+    longitude: -122.03107,
+    category: 'birthplace',
+    difficulty: 'hard',
+    sourceNote: 'Fact: Biography.com (https://www.biography.com/actors/tom-hanks); Coordinates: GeoNames (https://www.geonames.org/5339111/concord.html); Target: representative city point, not a specific birth building; Reviewed: 2026-10-08.',
+  },
+  {
+    id: 'q002',
+    celebrityId: 'scarlett-johansson',
+    prompt: 'In which city was Scarlett Johansson born?',
+    answerLabel: 'New York City, USA',
+    latitude: 40.71427,
+    longitude: -74.00597,
+    category: 'birthplace',
+    difficulty: 'easy',
+    sourceNote: 'Fact: Biography.com (https://www.biography.com/actors/scarlett-johansson); Coordinates: GeoNames (https://www.geonames.org/5128581/new-york-city.html); Target: GeoNames representative city point, not a specific birth building; Reviewed: 2026-10-08.',
+  },
+  {
+    id: 'q003',
+    celebrityId: 'keanu-reeves',
+    prompt: 'In which city was Keanu Reeves born?',
+    answerLabel: 'Beirut, Lebanon',
+    latitude: 33.89332,
+    longitude: 35.50157,
+    category: 'birthplace',
+    difficulty: 'medium',
+    sourceNote: 'Fact: Biography.com (https://www.biography.com/actors/keanu-reeves); Coordinates: GeoNames (https://www.geonames.org/276781/beirut.html); Target: representative city point; Reviewed: 2026-10-08.',
+  },
+  {
+    id: 'q004',
+    celebrityId: 'emma-watson',
+    prompt: 'In which city was Emma Watson born?',
+    answerLabel: 'Paris, France',
+    latitude: 48.85341,
+    longitude: 2.34880,
+    category: 'birthplace',
+    difficulty: 'medium',
+    sourceNote: 'Fact: Biography.com (https://www.biography.com/actors/emma-watson); Coordinates: GeoNames (https://www.geonames.org/2988507/paris.html); Target: representative city point; Reviewed: 2026-10-08.',
+  },
+  {
+    id: 'q005',
+    celebrityId: 'matt-damon',
+    prompt: 'Where was the famous park bench scene from Good Will Hunting filmed?',
+    answerLabel: 'Boston Public Garden, Boston, USA',
+    latitude: 42.35395,
+    longitude: -71.06988,
+    category: 'filming-location',
+    difficulty: 'hard',
+    sourceNote: 'Fact: Boston.com (https://www.boston.com/culture/movies/2025/06/09/the-big-boston-movie-tour-heres-where-6-of-your-favorite-boston-flicks-were-filmed/); Coordinates: GeoNames (https://www.geonames.org/4946692); Target: representative point of Boston Public Garden, not the exact park bench or filming camera position; Reviewed: 2026-10-08.',
+  },
+  {
+    id: 'q006',
+    celebrityId: 'julia-roberts',
+    prompt: 'Where is the hotel where Vivian stays with Edward in Pretty Woman located?',
+    answerLabel: 'Beverly Wilshire Hotel, Beverly Hills, California, USA',
+    latitude: 34.06694,
+    longitude: -118.40111,
+    category: 'filming-location',
+    difficulty: 'medium',
+    sourceNote: 'Fact: Love Beverly Hills (https://lovebeverlyhills.com/articles/view/beverly-hills-movie-filming-locations) and Four Seasons (https://www.fourseasons.com/beverlywilshire/services-and-amenities/hotel-history/); Coordinates: Wikidata (https://www.wikidata.org/wiki/Q1630836); Target: Beverly Wilshire Hotel building, not an interior suite set; the film used multiple production locations, so this does not imply all hotel interiors were filmed here; Reviewed: 2026-10-08.',
+  },
+]
