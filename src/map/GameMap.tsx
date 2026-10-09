@@ -11,13 +11,16 @@ setWorkerUrl(workerUrl)
 
 type GameMapProps = {
   guess: Coordinates | null
+  answer: Coordinates | null
+  guessLocked: boolean
   onGuess: (coordinates: Coordinates) => void
 }
 
-export default function GameMap({ guess, onGuess }: GameMapProps) {
+export default function GameMap({ guess, answer, guessLocked, onGuess }: GameMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const markerRef = useRef<Marker | null>(null)
+  const answerMarkerRef = useRef<Marker | null>(null)
   const [readyMap, setReadyMap] = useState<MapLibreMap | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
 
@@ -27,25 +30,11 @@ export default function GameMap({ guess, onGuess }: GameMapProps) {
     const compactAttribution = container.clientWidth < 600
 
     let active = true
-    let ready = false
     let map: MapLibreMap | undefined
     let initializationTimeout: ReturnType<typeof setTimeout> | undefined
 
-    const onClick = (event: MapMouseEvent) => {
-      if (!active || !ready || !map || event.originalEvent.button !== 0) return
-      const target = event.originalEvent.target
-      // Allow canvas-container descendants; controls and status overlays are outside it.
-      if (!(target instanceof Node) || !map.getCanvasContainer().contains(target)) return
-      if (!event.lngLat || !Number.isFinite(event.lngLat.lat) || !Number.isFinite(event.lngLat.lng)) return
-
-      const wrapped = event.lngLat.wrap()
-      const coordinates = getGuessCoordinates(wrapped, event.point, (candidate) => map!.project(candidate))
-      if (coordinates) onGuess(coordinates)
-    }
-
     const onReady = () => {
       if (!active || !map) return
-      ready = true
       clearTimeout(initializationTimeout)
       setReadyMap(map)
       setStatus('ready')
@@ -74,7 +63,6 @@ export default function GameMap({ guess, onGuess }: GameMapProps) {
       // A loaded style can remain usable despite individual tile failures.
       map.on('style.load', onStyleLoad)
       map.on('load', onReady)
-      map.on('click', onClick)
       map.on('error', (event) => {
         console.warn('Map resource error:', event.error)
       })
@@ -96,17 +84,41 @@ export default function GameMap({ guess, onGuess }: GameMapProps) {
 
     return () => {
       active = false
-      ready = false
       clearTimeout(initializationTimeout)
-      map?.off('click', onClick)
       map?.off('load', onReady)
       map?.off('style.load', onStyleLoad)
       markerRef.current?.remove()
       markerRef.current = null
+      answerMarkerRef.current?.remove()
+      answerMarkerRef.current = null
       mapRef.current = null
       map?.remove()
     }
-  }, [onGuess])
+  }, [])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || readyMap !== map || guessLocked) return
+    let active = true
+
+    const onClick = (event: MapMouseEvent) => {
+      if (!active || mapRef.current !== map || event.originalEvent.button !== 0) return
+      const target = event.originalEvent.target
+      // Allow canvas-container descendants; controls and status overlays are outside it.
+      if (!(target instanceof Node) || !map.getCanvasContainer().contains(target)) return
+      if (!event.lngLat || !Number.isFinite(event.lngLat.lat) || !Number.isFinite(event.lngLat.lng)) return
+
+      const wrapped = event.lngLat.wrap()
+      const coordinates = getGuessCoordinates(wrapped, event.point, (candidate) => map.project(candidate))
+      if (coordinates) onGuess(coordinates)
+    }
+
+    map.on('click', onClick)
+    return () => {
+      active = false
+      map.off('click', onClick)
+    }
+  }, [readyMap, guessLocked, onGuess])
 
   useEffect(() => {
     const map = mapRef.current
@@ -131,6 +143,32 @@ export default function GameMap({ guess, onGuess }: GameMapProps) {
       markerRef.current = marker.setLngLat([guess.lng, guess.lat]).addTo(map)
     }
   }, [guess, readyMap])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || readyMap !== map) return
+
+    if (!answer) {
+      answerMarkerRef.current?.remove()
+      answerMarkerRef.current = null
+      return
+    }
+
+    if (answerMarkerRef.current) {
+      answerMarkerRef.current.setLngLat([answer.lng, answer.lat])
+    } else {
+      const element = document.createElement('div')
+      element.setAttribute('aria-hidden', 'true')
+      const marker = new Marker({
+        element,
+        className: 'answer-marker',
+        anchor: 'center',
+        draggable: false,
+        opacityWhenCovered: 0,
+      })
+      answerMarkerRef.current = marker.setLngLat([answer.lng, answer.lat]).addTo(map)
+    }
+  }, [answer, readyMap])
 
   return (
     <div className="game-map" aria-busy={status === 'loading'}>

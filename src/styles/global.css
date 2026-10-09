@@ -56,8 +56,79 @@ body {
   color: #ffba75;
 }
 
-.guess-marker {
+.question-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.submit-button {
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 1px solid #ffba75;
+  border-radius: 0.25rem;
+  background: #ff9f43;
+  color: #10151d;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #ffba75;
+}
+
+.submit-button:focus-visible {
+  outline: 2px solid #f1f5f9;
+  outline-offset: 3px;
+}
+
+.submit-button:disabled {
+  border-color: #536174;
+  background: #263241;
+  color: #c8d3e0;
+  cursor: default;
+}
+
+.question-result {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.question-result p {
+  margin: 0;
+}
+
+.result-metrics,
+.marker-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+.guess-legend {
+  color: #ffba75;
+}
+
+.answer-legend {
+  color: #75e3a3;
+}
+
+.guess-marker,
+.answer-marker {
   pointer-events: none;
+}
+
+.answer-marker {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #75e3a3;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #10151d;
 }
 
 .map-area {
