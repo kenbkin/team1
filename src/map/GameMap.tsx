@@ -1,13 +1,55 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Map as MapLibreMap, Marker, NavigationControl, setWorkerUrl } from 'maplibre-gl'
-import type { MapMouseEvent } from 'maplibre-gl'
+import type { GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import MapStatus from '../components/MapStatus'
 import { resolveMapStyle } from './mapConfig'
 import { getGuessCoordinates } from './guessCoordinates'
 import type { Coordinates } from './guessCoordinates'
+import type { GeodesicLineGeometry } from './geodesicLine'
+import { createGeodesicLine, prepareGeodesicPrefix } from './geodesicLine'
 
 setWorkerUrl(workerUrl)
+
+const ROUTE_SOURCE = 'team1-answer-route'
+const ROUTE_CASING = 'team1-answer-route-casing'
+const ROUTE_LINE = 'team1-answer-route-line'
+const ROUTE_DURATION_MS = 800
+const ROUTE_UPDATE_INTERVAL_MS = 1000 / 30
+type RouteData = {
+  type: 'FeatureCollection'
+  features: { type: 'Feature'; properties: Record<string, never>; geometry: GeodesicLineGeometry }[]
+}
+const EMPTY_ROUTE: RouteData = { type: 'FeatureCollection', features: [] }
+
+function routeFeatureCollection(geometry: GeodesicLineGeometry): RouteData {
+  return {
+    type: 'FeatureCollection',
+    features: geometry.coordinates.length ? [{ type: 'Feature', properties: {}, geometry }] : [],
+  }
+}
+
+function ensureRouteLayers(map: MapLibreMap, data: RouteData) {
+  const existing = map.getSource(ROUTE_SOURCE) as GeoJSONSource | undefined
+  if (existing) {
+    existing.setData(data)
+  } else {
+    map.addSource(ROUTE_SOURCE, { type: 'geojson', data, tolerance: 0 })
+  }
+  const before = map.getStyle().layers.find((layer) => layer.type === 'symbol')?.id
+  for (const [id, color, width, opacity] of [
+    [ROUTE_CASING, '#10151d', 4.5, 0.9],
+    [ROUTE_LINE, '#b9e6ff', 2.5, 0.9],
+  ] as const) {
+    if (!map.getLayer(id)) {
+      map.addLayer({
+        id, type: 'line', source: ROUTE_SOURCE,
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': color, 'line-width': width, 'line-opacity': opacity },
+      }, before)
+    }
+  }
+}
 
 type GameMapProps = {
   guess: Coordinates | null
@@ -23,6 +65,86 @@ export default function GameMap({ guess, answer, guessLocked, onGuess }: GameMap
   const answerMarkerRef = useRef<Marker | null>(null)
   const [readyMap, setReadyMap] = useState<MapLibreMap | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+
+  const guessLat = guess?.lat
+  const guessLng = guess?.lng
+  const answerLat = answer?.lat
+  const answerLng = answer?.lng
+  const routeData = useMemo<RouteData>(() => {
+    if (guessLat === undefined || guessLng === undefined || answerLat === undefined || answerLng === undefined) {
+      return EMPTY_ROUTE
+    }
+    return routeFeatureCollection(createGeodesicLine(
+      { lat: guessLat, lng: guessLng }, { lat: answerLat, lng: answerLng },
+    ))
+  }, [guessLat, guessLng, answerLat, answerLng])
+  const routeDataRef = useRef<RouteData>(EMPTY_ROUTE)
+
+  // Clear before paint on Next and cancel this result's work before replacing it.
+  // Style reloads use the current prefix ref and do not restart the animation.
+  useLayoutEffect(() => {
+    const map = mapRef.current
+    routeDataRef.current = EMPTY_ROUTE
+    if (!map || readyMap !== map) return
+    let active = true
+    let frame: number | undefined
+    const publish = (data: RouteData) => {
+      if (!active || mapRef.current !== map) return
+      routeDataRef.current = data
+      const source = map.getSource(ROUTE_SOURCE) as GeoJSONSource | undefined
+      source?.setData(data)
+    }
+    publish(EMPTY_ROUTE)
+    if (!routeData.features.length) return
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let complete = false
+    const finish = () => {
+      if (!active || complete || mapRef.current !== map) return
+      complete = true
+      if (frame !== undefined) cancelAnimationFrame(frame)
+      frame = undefined
+      publish(routeData)
+    }
+    const prefix = prepareGeodesicPrefix(routeData.features[0].geometry)
+    const start = performance.now()
+    let lastUpdate = start
+    const tick = (now: number) => {
+      frame = undefined
+      if (!active || complete || mapRef.current !== map) return
+      const progress = Math.max(0, Math.min(1, (now - start) / ROUTE_DURATION_MS))
+      if (progress === 1) {
+        finish()
+        return
+      }
+      if (now - lastUpdate >= ROUTE_UPDATE_INTERVAL_MS) {
+        lastUpdate = now
+        const eased = 1 - (1 - progress) ** 3
+        publish(routeFeatureCollection(prefix(eased)))
+      }
+      frame = requestAnimationFrame(tick)
+    }
+    // Finish rather than replaying or extending a reveal after a hidden tab.
+    const onVisibilityChange = () => { if (document.hidden) finish() }
+    const onMotionChange = () => { if (reducedMotion.matches) finish() }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    reducedMotion.addEventListener('change', onMotionChange)
+    if (reducedMotion.matches || document.hidden) finish()
+    else frame = requestAnimationFrame(tick)
+
+    return () => {
+      active = false
+      if (frame !== undefined) cancelAnimationFrame(frame)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      reducedMotion.removeEventListener('change', onMotionChange)
+      // Invalidated callbacks cannot republish after this synchronous clear.
+      if (mapRef.current === map) {
+        routeDataRef.current = EMPTY_ROUTE
+        const source = map.getSource(ROUTE_SOURCE) as GeoJSONSource | undefined
+        source?.setData(EMPTY_ROUTE)
+      }
+    }
+  }, [routeData, readyMap])
 
   useEffect(() => {
     const container = containerRef.current
@@ -48,6 +170,7 @@ export default function GameMap({ guess, answer, guessLocked, onGuess }: GameMap
     const onStyleLoad = () => {
       if (!active || !map) return
       map.setProjection({ type: 'globe' })
+      ensureRouteLayers(map, routeDataRef.current)
     }
 
     try {
