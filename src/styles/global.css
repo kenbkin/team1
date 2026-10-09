@@ -64,7 +64,8 @@ body {
   margin-top: 0.5rem;
 }
 
-.submit-button {
+.submit-button,
+.action-button {
   min-height: 44px;
   padding: 0.5rem 1rem;
   border: 1px solid #ffba75;
@@ -80,7 +81,11 @@ body {
   background: #ffba75;
 }
 
-.submit-button:focus-visible {
+.submit-button:focus-visible,
+.action-button:focus-visible,
+.question-prompt:focus-visible,
+.round-summary h2:focus-visible,
+.round-details:focus-visible {
   outline: 2px solid #f1f5f9;
   outline-offset: 3px;
 }
@@ -163,4 +168,242 @@ body {
 
 .map-status p {
   margin: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.round-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-top: 0.5rem;
+  color: #c8d3e0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.round-progress strong {
+  color: #ffba75;
+}
+
+.action-button {
+  border-color: #64748b;
+  background: #1c2939;
+  color: #f1f5f9;
+}
+
+.action-button:hover {
+  border-color: #a5b4c7;
+  background: #2b3c50;
+}
+
+.submit-button,
+.action-button {
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.round-summary {
+  max-width: 58rem;
+  margin: 0.5rem auto 0;
+  text-align: center;
+}
+
+.summary-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.summary-celebration {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid #705a38;
+  border-radius: 50%;
+  background: #2b251b;
+  font-size: 1.5rem;
+}
+
+.round-summary h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1.3;
+}
+
+.summary-title p {
+  margin: 0.25rem 0 0;
+  color: #c8d3e0;
+  font-size: 0.875rem;
+}
+
+.summary-score {
+  margin: 0.5rem 0 0;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.summary-score strong {
+  color: #ffba75;
+  font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.summary-score span {
+  color: #c8d3e0;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+}
+
+.summary-score-label {
+  margin: 0.25rem 0 0;
+  color: #c8d3e0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.summary-actions button {
+  border-radius: 0.5rem;
+}
+
+.round-details {
+  max-height: min(26dvh, 18rem);
+  margin-top: 0.75rem;
+  padding: 0.25rem;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-color: #64748b #10151d;
+  text-align: left;
+}
+
+.result-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.result-card {
+  min-width: 0;
+  padding: 0.875rem;
+  border: 1px solid #3a4b5b;
+  border-radius: 0.75rem;
+  background: #162231;
+  overflow-wrap: anywhere;
+}
+
+.result-card h3 {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.question-badge {
+  flex: none;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid #52677b;
+  border-radius: 0.375rem;
+  background: #24364a;
+  color: #e1eaf5;
+  font-size: 0.75rem;
+}
+
+.detail-answer {
+  margin: 0.5rem 0;
+  color: #c8d3e0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.detail-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #c8d3e0;
+}
+
+.detail-metrics p {
+  margin: 0;
+}
+
+.detail-points {
+  color: #e1eaf5;
+  white-space: nowrap;
+}
+
+.detail-points strong {
+  font-size: 1rem;
+}
+
+.result-card progress {
+  display: block;
+  appearance: none;
+  width: 100%;
+  height: 0.375rem;
+  margin-top: 0.625rem;
+  overflow: hidden;
+  border: 0;
+  border-radius: 1rem;
+  background: #34465b;
+  color: #75e3a3;
+}
+
+.result-card progress::-webkit-progress-bar {
+  border-radius: 1rem;
+  background: #34465b;
+}
+
+.result-card progress::-webkit-progress-value {
+  border-radius: 1rem;
+  background: #75e3a3;
+}
+
+.result-card progress::-moz-progress-bar {
+  border-radius: 1rem;
+  background: #75e3a3;
+}
+
+@media (max-width: 600px) {
+  .result-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .round-details {
+    max-height: 22dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit-button,
+  .action-button {
+    transition: none;
+  }
 }
